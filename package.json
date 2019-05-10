@@ -1,0 +1,16 @@
+{
+  "name": "web-map-redo",
+  "author": "",
+  "version": "0.0.1",
+  "description": "Greenstand tree-map 2.0",
+  "keywords": [],
+  "main": "server/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kuehlein/web-map-redo.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "AGPL"
+}
