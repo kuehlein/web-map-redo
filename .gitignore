@@ -7,5 +7,8 @@
 # secrets
 secrets.js
 
+# private certificates and keys
+/src/server/ssl
+
 # npm
 npm-debug.log
