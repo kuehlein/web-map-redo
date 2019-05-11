@@ -1,8 +1,8 @@
-const CleanWebpackPlugin = require("clean-webpack-plugin");
-const ExtractCssChunks = require("extract-css-chunks-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const path = require("path");
-const webpack = require("webpack");
+const TerserPlugin = require("terser-webpack-plugin");
+const { optimize } = require("webpack");
 
 // path to root directory
 const rootDir = [".."];
@@ -11,42 +11,55 @@ const rootDir = [".."];
 const exclude = /node_modules/;
 const include = path.resolve(__dirname, "client");
 
-// development plugins
+// production plugins
 const plugins = [
-  new CleanWebpackPlugin(),
-  new webpack.HotModuleReplacementPlugin(),
-  new ExtractCssChunks({
+  new optimize.ModuleConcatenationPlugin(),
+  new MiniCssExtractPlugin({
     chunkFilename: "[id].[hash].css",
-    cssModules: true,
-    filename: "[name].[hash].css",
-    hot: true
+    filename: "[name].[hash].css"
   }),
-  new HtmlWebpackPlugin({
-    favicon: path.resolve(__dirname, ...rootDir, "public", "favicon.ico"),
-    template: path.resolve(__dirname, ...rootDir, "public", "index.html")
+  new OptimizeCssAssetsPlugin({})
+];
+const minimizer = [
+  new TerserPlugin({
+    exclude,
+    include,
+    parallel: true,
+    terserOptions: {
+      ecma: undefined,
+      warnings: false,
+      parse: {},
+      compress: {},
+      mangle: true,
+      module: false,
+      output: null,
+      toplevel: false,
+      nameCache: null,
+      ie8: false,
+      keep_classnames: undefined,
+      keep_fnames: false,
+      safari10: false
+    },
+    test: /\.jsx?$/
   })
 ];
 
-const devConfig = {
+const prodConfig = {
   context: path.resolve(__dirname, ...rootDir),
-  devtool: "cheap-module-eval-source-map",
-  entry: {
-    client: ["webpack-hot-middleware/client", include] // /patch
-  },
-  mode: "development",
+  devtool: "cheap-module-source-map",
+  entry: include,
+  mode: "production",
   module: {
     rules: [
       {
         exclude,
-        loader: "style-loader",
+        loader: MiniCssExtractPlugin.loader,
+        options: {},
         test: /\.css$/
       },
       {
         exclude,
         loader: "css-loader",
-        options: {
-          modules: true
-        },
         test: /\.css$/
       },
       {
@@ -77,19 +90,17 @@ const devConfig = {
     ]
   },
   optimization: {
-    nodeEnv: "development"
+    minimizer
   },
   output: {
-    filename: "[name].[hash].bundle.js",
-    path: path.resolve(__dirname, ...rootDir, "public", "dist"),
-    publicPath: "/"
+    filename: "[name].[hash].js",
+    path: path.resolve(__dirname, ...rootDir, "public", "dist")
   },
   plugins,
   resolve: {
-    alias: { "react-dom": "@hot-loader/react-dom" },
     extensions: [".js", ".jsx", ".jpg", ".png", ".gif", ".svg", "*"]
   },
   target: "web"
 };
 
-module.exports = devConfig;
+module.exports = prodConfig;
