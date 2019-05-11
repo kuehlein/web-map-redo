@@ -2,7 +2,7 @@ import React from "react";
 import { withRouter } from "react-router-dom";
 
 // * import app.css before other components to apply styles
-import "./app.css";
+// import "./app.css";
 
 import Footer from "./Footer";
 import Main from "./Main";
