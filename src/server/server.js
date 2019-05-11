@@ -7,6 +7,11 @@ const https = require('https');
 const _ = require('lodash');
 const morgan = require('morgan');
 const path = require('path');
+const webpack = require('webpack');
+const webpackDevMiddleware = require('webpack-dev-middleware');
+const webpackHotMiddleware = require('webpack-hot-middleware');
+
+const config = require('../webpack.dev.config');
 
 // const db = require("./db"); // ! not yet implemented
 
@@ -38,6 +43,9 @@ class Server {
     // enviornment variable determining type of enviornment, either `"production"` or `"developemnt"`
     this.NODE_ENV = process.env.NODE_ENV || 'production';
 
+    // If `enabled`, Hot Module Replacement is active. Enable *FOR DEVELOPMENT ONLY*
+    this.HMR = process.env.HMR === 'enabled' ? 'enabled' : 'disabled';
+
     // configuration settings being used based on `this.NODE_ENV`
     this.config = Server.configurations(this.NODE_ENV);
 
@@ -46,12 +54,8 @@ class Server {
       ? // * Make sure the files are secured.
         https.createServer(
           {
-            cert: fs.readFileSync(
-              path.resolve(__dirname, 'ssl', 'production', 'server.crt')
-            ),
-            key: fs.readFileSync(
-              path.resolve(__dirname, 'ssl', 'production', 'server.key')
-            )
+            cert: fs.readFileSync(path.resolve(__dirname, 'ssl', 'server.crt')),
+            key: fs.readFileSync(path.resolve(__dirname, 'ssl', 'server.key'))
           },
           this.app
         )
@@ -65,6 +69,7 @@ class Server {
     this.syncDb()
       .then(() => this.appServer())
       .then(() => this.startListening())
+      .then(() => this.HMR === 'enabled' && this.bundlingMiddleware())
       .then(() => this.webServer())
       .catch(err => console.log(err));
   }
@@ -145,6 +150,37 @@ class Server {
   }
 
   /**
+   * Applies `webpack-dev-middleware` and `webpack-hot-middleware`
+   * to enable Hot Module Replacement in development.
+   *
+   * *NOTE* --- Do not use nodemon or anything that restarts server...
+   *
+   * *DEVELOPMENT ONLY*
+   */
+  bundlingMiddleware() {
+    const compiler = webpack(config);
+
+    this.app.use(
+      webpackDevMiddleware(compiler, {
+        logLevel: 'warn',
+        publicPath: config.output.publicPath,
+        stats: {
+          colors: true
+        }
+      })
+    );
+
+    this.app.use(
+      webpackHotMiddleware(compiler, {
+        heartbeat: 2000,
+        log: console.log,
+        path: ''
+        // reload: true // ! issues with react-router caused force reload
+      })
+    );
+  }
+
+  /**
    * Serves the static assets like css and html files.
    */
   webServer() {
@@ -169,6 +205,13 @@ class Server {
 
     // sends index.html
     this.app.use('*', (req, res) => {
+      if (this.HMR === 'enabled') {
+        res.set({
+          Connection: 'keep-alive',
+          'Content-Type': 'text/event-stream'
+        });
+      }
+
       res.sendFile(path.join(__dirname, ...rootDir, 'public', 'index.html'));
     });
   }
