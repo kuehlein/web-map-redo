@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React from "react";
+import React, { ReactElement } from "react";
 
 /**
  * Main container in app. Wraps all views. Rendered in the main `App` component.
@@ -13,7 +13,7 @@ Main.defaultProps = {
 };
 
 Main.propTypes = {
-  children: PropTypes.any
+  children: ReactElement || PropTypes.string
 };
 
 export default Main;

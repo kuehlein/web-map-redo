@@ -1,8 +1,9 @@
-import React, { Fragment } from 'react';
-import { Link } from 'react-router-dom';
+import React, { Fragment } from "react";
+import { Link } from "react-router-dom";
 
-import logo from '../../../../public/assets/media/logo.png'; // ! temp...
-import { MButton } from '../Materials';
+import logo from "../../../../public/assets/media/logo.png"; // ! temp...
+import { MButton } from "../Materials";
+import { isCurrentPath } from "./utils";
 
 /**
  * Navbar. Rendered at the top of the main `App` component. Contains navigation options.
@@ -12,38 +13,38 @@ import { MButton } from '../Materials';
 const Navbar = () => (
   <Fragment>
     <h2>
-      <Link disabled={window.location.pathname === '/'} to="/">
-        <img style={{ height: '2em' }} src={logo} alt="logo" />
+      <Link disabled={isCurrentPath("/")} to="/">
+        <img style={{ height: "2em" }} src={logo} alt="logo" />
       </Link>
     </h2>
     <div>
       <MButton
-        disabled={window.location.pathname === '/get-involved'}
+        disabled={isCurrentPath("/get-involved")}
         name="Get Involved"
         redirect="get-involved"
       />
       <MButton
-        disabled={window.location.pathname === '/planters'}
+        disabled={isCurrentPath("/planters")}
         name="Tree Planters"
         redirect="planters"
       />
       <MButton
-        disabled={window.location.pathname === '/support'}
+        disabled={isCurrentPath("/support")}
         name="Support"
         redirect="support"
       />
       <MButton
-        disabled={window.location.pathname === '/explore'}
+        disabled={isCurrentPath("/explore")}
         name="Explore the Trees"
         redirect="explore"
       />
       <MButton
-        disabled={window.location.pathname === '/about'}
+        disabled={isCurrentPath("/about")}
         name="About Greenstand"
         redirect="about"
       />
       <MButton
-        disabled={window.location.pathname === '/contact'}
+        disabled={isCurrentPath("/contact")}
         name="Contact"
         redirect="contact"
       />

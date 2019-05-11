@@ -1,49 +1,49 @@
-const CleanWebpackPlugin = require('clean-webpack-plugin');
-const ExtractCssChunks = require('extract-css-chunks-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const path = require('path');
-const webpack = require('webpack');
+const CleanWebpackPlugin = require("clean-webpack-plugin");
+const ExtractCssChunks = require("extract-css-chunks-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const path = require("path");
+const webpack = require("webpack");
 
 // path to root directory
-const root = ['..'];
+const root = [".."];
 
 // repeated config settings / paths
 const exclude = /node_modules/;
-const include = path.resolve(__dirname, 'client');
+const include = path.resolve(__dirname, "client");
 
 // development plugins
 const plugins = [
   new CleanWebpackPlugin(),
   new webpack.HotModuleReplacementPlugin(),
   new ExtractCssChunks({
-    chunkFilename: '[id].[hash].css',
+    chunkFilename: "[id].[hash].css",
     cssModules: true,
-    filename: '[name].[hash].css',
+    filename: "[name].[hash].css",
     hot: true
   }),
   new HtmlWebpackPlugin({
-    favicon: path.resolve(__dirname, ...root, 'public', 'favicon.ico'),
-    template: path.resolve(__dirname, ...root, 'public', 'index.html')
+    favicon: path.resolve(__dirname, ...root, "public", "favicon.ico"),
+    template: path.resolve(__dirname, ...root, "public", "index.html")
   })
 ];
 
 const devConfig = {
   context: path.resolve(__dirname, ...root),
-  devtool: 'cheap-module-eval-source-map',
+  devtool: "cheap-module-eval-source-map",
   entry: {
-    client: ['webpack-hot-middleware/client', include] // /patch
+    client: ["webpack-hot-middleware/client", include] // /patch
   },
-  mode: 'development',
+  mode: "development",
   module: {
     rules: [
       {
         exclude,
-        loader: 'style-loader',
+        loader: "style-loader",
         test: /\.css$/
       },
       {
         exclude,
-        loader: 'css-loader',
+        loader: "css-loader",
         options: {
           modules: true
         },
@@ -53,11 +53,11 @@ const devConfig = {
         test: /\.(jpg|png|gif|svg)$/,
         use: [
           {
-            loader: 'file-loader',
+            loader: "file-loader",
             options: {
-              name: '[name].[ext]',
-              outputPath: '../public/assets/media/',
-              publicPath: '../public/assets/media/'
+              name: "[name].[ext]",
+              outputPath: "../public/assets/media/",
+              publicPath: "../public/assets/media/"
             }
           }
         ]
@@ -65,31 +65,31 @@ const devConfig = {
       {
         exclude,
         include,
-        loaders: 'babel-loader',
+        loaders: "babel-loader",
         test: /\.jsx?$/
       },
       {
-        enforce: 'pre',
+        enforce: "pre",
         exclude,
-        loader: 'source-map-loader',
+        loader: "source-map-loader",
         test: /\.js$/
       }
     ]
   },
   optimization: {
-    nodeEnv: 'development'
+    nodeEnv: "development"
   },
   output: {
-    filename: '[name].[hash].bundle.js',
-    path: path.resolve(__dirname, ...root, 'public', 'dist'),
-    publicPath: '/'
+    filename: "[name].[hash].bundle.js",
+    path: path.resolve(__dirname, ...root, "public", "dist"),
+    publicPath: "/"
   },
   plugins,
   resolve: {
-    alias: { 'react-dom': '@hot-loader/react-dom' },
-    extensions: ['.js', '.jsx', '.jpg', '.png', '.gif', '.svg', '*']
+    alias: { "react-dom": "@hot-loader/react-dom" },
+    extensions: [".js", ".jsx", ".jpg", ".png", ".gif", ".svg", "*"]
   },
-  target: 'web'
+  target: "web"
 };
 
 module.exports = devConfig;

@@ -1,10 +1,10 @@
-import _ from 'lodash';
-import PropTypes from 'prop-types';
-import React from 'react';
+import _ from "lodash";
+import PropTypes from "prop-types";
+import React, { ReactElement } from "react";
 
-import { MButton } from './index';
+import MButton from "./MButton";
 
-const css = require('./materials.css');
+const css = require("./materials.css");
 
 /**
  * Template for forms. Supports redirecting after submit with prop `redirect`
@@ -51,19 +51,19 @@ MForm.defaultProps = {
   children: <div />,
   disableSubmit: false,
   handleSubmit: () => {},
-  name: '',
-  redirect: '', // * defaults to empty string: falsy value will not redirect
-  styling: 'std'
+  name: "",
+  redirect: "", // * defaults to empty string: falsy value will not redirect
+  styling: "std"
 };
 
 MForm.propTypes = {
   args: PropTypes.arrayOf(PropTypes.any),
-  children: PropTypes.any,
+  children: ReactElement || PropTypes.string,
   disableSubmit: PropTypes.bool,
   handleSubmit: PropTypes.func,
   name: PropTypes.string,
   redirect: PropTypes.string,
-  styling: PropTypes.oneOf(['std']) // ! Add more when start to style
+  styling: PropTypes.oneOf(["std"]) // ! Add more when start to style
 };
 
 export default MForm;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 /**
  * Component for page footer. Rendered at bottom of main `App` component.
