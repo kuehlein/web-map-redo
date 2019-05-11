@@ -21,7 +21,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@hot-loader/react-dom": "^16.8.6",
     "@loadable/component": "^5.9.0",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
@@ -42,10 +41,17 @@
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "@babel/preset-react": "^7.0.0",
+    "@hot-loader/react-dom": "^16.8.6",
     "babel-loader": "^8.0.5",
     "babel-plugin-lodash": "^3.3.4",
     "clean-webpack-plugin": "^2.0.2",
     "css-loader": "^2.1.1",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^4.2.0",
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.13.0",
     "extract-css-chunks-webpack-plugin": "^4.3.2",
     "file-loader": "^3.0.1",
     "html-webpack-plugin": "^3.2.0",
@@ -60,5 +66,5 @@
     "webpack-dev-middleware": "^3.6.2",
     "webpack-hot-middleware": "^2.24.4"
   },
-  "license": "AGPL"
+  "license": "AGPL-3.0-only"
 }

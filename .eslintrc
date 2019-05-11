@@ -1,0 +1,8 @@
+{
+  "extends": ["airbnb", "prettier"],
+  "rules": {
+    "import/no-extraneous-dependencies": "off",
+    "import/prefer-default-export": "off",
+    "jsx-a11y/label-has-for": "off"
+  }
+}

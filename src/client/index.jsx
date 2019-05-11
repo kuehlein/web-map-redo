@@ -1,13 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Router } from 'react-router-dom';
+import React from "react";
+import ReactDOM from "react-dom";
+import { Router } from "react-router-dom";
 
-import { App } from './components';
-import history from './history';
+import App from "./components/App";
+import history from "./history";
 
 ReactDOM.render(
   <Router history={history}>
     <App />
   </Router>,
-  document.getElementById('app')
+  document.getElementById("app") // eslint-disable-line no-undef
 );

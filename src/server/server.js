@@ -1,17 +1,16 @@
-const bodyParser = require('body-parser');
-const compression = require('compression');
-const express = require('express');
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
-const _ = require('lodash');
-const morgan = require('morgan');
-const path = require('path');
-const webpack = require('webpack');
-const webpackDevMiddleware = require('webpack-dev-middleware');
-const webpackHotMiddleware = require('webpack-hot-middleware');
+const bodyParser = require("body-parser");
+const compression = require("compression");
+const express = require("express");
+const fs = require("fs");
+const http = require("http");
+const https = require("https");
+const morgan = require("morgan");
+const path = require("path");
+const webpack = require("webpack");
+const webpackDevMiddleware = require("webpack-dev-middleware");
+const webpackHotMiddleware = require("webpack-hot-middleware");
 
-const config = require('../webpack.dev.config');
+const config = require("../webpack.dev.config");
 
 // const db = require("./db"); // ! not yet implemented
 
@@ -21,8 +20,8 @@ const config = require('../webpack.dev.config');
  */
 class Server {
   /**
-   * Configuration options for development and production. Inside of the constructor
-   * Where the server is instantiated,
+   * Configuration options for development and production. Chosen based on
+   * `process.env.NODE_ENV` in constructor.
    *
    * @param {"development" | "production"} env - current enviornment, `"development"` or `"production"`
    * @returns {{}} either development or production configeration
@@ -30,8 +29,8 @@ class Server {
   static configurations(env) {
     // * Note: You may need sudo to run on port 443
     const configurationOptions = {
-      development: { hostname: 'localhost', port: 8080, ssl: false },
-      production: { hostname: 'example.com', port: 443, ssl: true }
+      development: { hostname: "localhost", port: 8080, ssl: false },
+      production: { hostname: "example.com", port: 443, ssl: true }
     };
     return configurationOptions[env];
   }
@@ -41,10 +40,10 @@ class Server {
     this.app = express();
 
     // enviornment variable determining type of enviornment, either `"production"` or `"developemnt"`
-    this.NODE_ENV = process.env.NODE_ENV || 'production';
+    this.NODE_ENV = process.env.NODE_ENV || "production";
 
     // If `enabled`, Hot Module Replacement is active. Enable *FOR DEVELOPMENT ONLY*
-    this.HMR = process.env.HMR === 'enabled' ? 'enabled' : 'disabled';
+    this.HMR = process.env.HMR === "enabled" ? "enabled" : "disabled";
 
     // configuration settings being used based on `this.NODE_ENV`
     this.config = Server.configurations(this.NODE_ENV);
@@ -54,8 +53,8 @@ class Server {
       ? // * Make sure the files are secured.
         https.createServer(
           {
-            cert: fs.readFileSync(path.resolve(__dirname, 'ssl', 'server.crt')),
-            key: fs.readFileSync(path.resolve(__dirname, 'ssl', 'server.key'))
+            cert: fs.readFileSync(path.resolve(__dirname, "ssl", "server.crt")),
+            key: fs.readFileSync(path.resolve(__dirname, "ssl", "server.key"))
           },
           this.app
         )
@@ -69,7 +68,7 @@ class Server {
     this.syncDb()
       .then(() => this.appServer())
       .then(() => this.startListening())
-      .then(() => this.HMR === 'enabled' && this.bundlingMiddleware())
+      .then(() => this.HMR === "enabled" && this.bundlingMiddleware())
       .then(() => this.webServer())
       .catch(err => console.log(err));
   }
@@ -101,16 +100,16 @@ class Server {
   appServer() {
     this.app.use((req, res, next) => {
       res.set({
-        'Access-Control-Allow-Credentials': 'same-origin',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-        'Access-Control-Allow-Methods': 'DELETE,GET,PATCH,POST,PUT',
-        'Access-Control-Allow-Origin': this.config.hostname
+        "Access-Control-Allow-Credentials": "same-origin",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization",
+        "Access-Control-Allow-Methods": "DELETE,GET,PATCH,POST,PUT",
+        "Access-Control-Allow-Origin": this.config.hostname
       });
       next();
     });
 
     // logging middleware
-    this.app.use(morgan('dev'));
+    this.app.use(morgan("dev"));
 
     // body parsing middleware
     this.app.use(bodyParser.json());
@@ -130,12 +129,12 @@ class Server {
    * Handles any unhandled errors that have been passed down from `api`.
    */
   errorHandlingEndware() {
-    this.app.use((err, req, res, next) => {
+    this.app.use((err, req, res) => {
       console.error(err);
       console.error(err.stack);
       res
         .status(err.status || 500)
-        .send(err.message || 'Internal server error.');
+        .send(err.message || "Internal server error.");
     });
   }
 
@@ -162,7 +161,7 @@ class Server {
 
     this.app.use(
       webpackDevMiddleware(compiler, {
-        logLevel: 'warn',
+        logLevel: "warn",
         publicPath: config.output.publicPath,
         stats: {
           colors: true
@@ -174,8 +173,7 @@ class Server {
       webpackHotMiddleware(compiler, {
         heartbeat: 2000,
         log: console.log,
-        path: ''
-        // reload: true // ! issues with react-router caused force reload
+        path: ""
       })
     );
   }
@@ -185,12 +183,12 @@ class Server {
    */
   webServer() {
     // path to root directory
-    const rootDir = ['..', '..'];
+    const rootDir = ["..", ".."];
 
     // staticly serve styles
     this.app.use(
       express.static(
-        path.join(__dirname, ...rootDir, 'src', 'client', 'main.css')
+        path.join(__dirname, ...rootDir, "src", "client", "main.css")
       )
     );
 
@@ -198,21 +196,22 @@ class Server {
     this.app
       .use(express.static(path.join(__dirname, ...rootDir)))
       .use((req, res, next) =>
-        (path.extname(req.path).length
+        path.extname(req.path).length
           ? next(new Error(`404 - Not found: ${req.path}`))
-          : next())
+          : next()
       );
 
-    // sends index.html
-    this.app.use('*', (req, res) => {
-      if (this.HMR === 'enabled') {
+    this.app.use("*", (req, res) => {
+      // set headers for hot module replacement
+      if (this.HMR === "enabled") {
         res.set({
-          Connection: 'keep-alive',
-          'Content-Type': 'text/event-stream'
+          Connection: "keep-alive",
+          "Content-Type": "text/event-stream"
         });
       }
 
-      res.sendFile(path.join(__dirname, ...rootDir, 'public', 'index.html'));
+      // sends index.html no matter what
+      res.sendFile(path.join(__dirname, ...rootDir, "public", "index.html"));
     });
   }
 }
