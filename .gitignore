@@ -5,7 +5,7 @@
 /public/dist
 
 # secrets
-secrets.js
+/src/secrets.js
 
 # private certificates and keys
 /src/server/ssl
