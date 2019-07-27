@@ -1,3 +1,4 @@
+const CleanWebpackPlugin = require("clean-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const path = require("path");
@@ -13,6 +14,7 @@ const include = path.resolve(__dirname, "client");
 
 // production plugins
 const plugins = [
+  new CleanWebpackPlugin(),
   new optimize.ModuleConcatenationPlugin(),
   new MiniCssExtractPlugin({
     chunkFilename: "[id].[hash].css",
@@ -20,6 +22,8 @@ const plugins = [
   }),
   new OptimizeCssAssetsPlugin({})
 ];
+
+// optimization configuration for minimizing code
 const minimizer = [
   new TerserPlugin({
     exclude,
@@ -44,6 +48,29 @@ const minimizer = [
   })
 ];
 
+// optimization configuration for code splitting
+const splitChunks = {
+  chunks: "async", // "all"
+  minSize: 30000,
+  maxSize: 0,
+  minChunks: 1,
+  maxAsyncRequests: 5,
+  maxInitialRequests: 3,
+  automaticNameDelimiter: "~",
+  name: true,
+  cacheGroups: {
+    vendors: {
+      test: /[\\/]node_modules[\\/]/,
+      priority: -10
+    },
+    default: {
+      minChunks: 2,
+      priority: -20,
+      reuseExistingChunk: true
+    }
+  }
+};
+
 const prodConfig = {
   context: path.resolve(__dirname, ...rootDir),
   devtool: "cheap-module-source-map",
@@ -53,46 +80,43 @@ const prodConfig = {
     rules: [
       {
         exclude,
-        loader: MiniCssExtractPlugin.loader,
-        options: {},
-        test: /\.css$/
-      },
-      {
-        exclude,
-        loader: "css-loader",
-        test: /\.css$/
-      },
-      {
-        test: /\.(jpg|png|gif|svg)$/,
+        include,
+        test: /\.scss$/,
         use: [
+          MiniCssExtractPlugin.loader,
           {
-            loader: "file-loader",
+            loader: "css-loader",
             options: {
-              name: "[name].[ext]",
-              outputPath: "../public/assets/media/",
-              publicPath: "../public/assets/media/"
+              modules: true,
+              camelCase: true
             }
-          }
+          },
+          "sass-loader"
         ]
+      },
+      {
+        loader: "file-loader",
+        options: {
+          name: "[name].[ext]",
+          outputPath: "assets/media/",
+          publicPath: "../public/assets/media/"
+        },
+        test: /\.(jpg|png|gif|svg)$/
       },
       {
         exclude,
         include,
         loaders: "babel-loader",
         test: /\.jsx?$/
-      },
-      {
-        enforce: "pre",
-        exclude,
-        loader: "source-map-loader",
-        test: /\.js$/
       }
     ]
   },
   optimization: {
-    minimizer
+    minimizer,
+    splitChunks
   },
   output: {
+    chunkFilename: "[name].[hash].js",
     filename: "[name].[hash].js",
     path: path.resolve(__dirname, ...rootDir, "public", "dist")
   },
