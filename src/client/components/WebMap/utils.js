@@ -1,3 +1,7 @@
+// * import from config --- CONSTANT
+const treetrackerApiUrl =
+  "http://localhost:8080/api/web/" || "http://dev.treetracker.org/api/web/";
+
 export const getClusterRadius = zoom =>
   ({
     1: 10,
@@ -98,7 +102,6 @@ export const buildQueryURL = (
   organization,
   token,
   treeid,
-  treetrackerApiUrl,
   viewportBounds,
   zoomLevel
 ) => {

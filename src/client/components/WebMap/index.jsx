@@ -10,22 +10,9 @@ import {
   toUrlValueLonLat
 } from "./utils";
 
-/**
- * ! ----------------------------*Future Props*---------------------------------
- */
-
-let fetchMarkers = true;
-
-const treetrackerApiUrl =
-  "http://localhost:8080/api/web/" || "http://dev.treetracker.org/api/web/"; // ! value from config?
-
-let currentZoom;
-
-const firstRender = true;
-
-/**
- * ! ---------------------------------------------------------------------------
- */
+// ! -----
+// * what to do about `google` and `maps`?
+// ! -----
 
 export const MapContainer = ({ center, google, initialCenter }) => {
   // ! context...
@@ -41,12 +28,14 @@ export const MapContainer = ({ center, google, initialCenter }) => {
     // { lat: 41.03, lng: -77.04 },
     // { lat: 42.05, lng: -77.02 }
   ];
+  const markers = []; // ! ???
+
+  // ??????????????????
+  const firstRender = true;
+  let treeInfoDivShowing = false;
 
   let req = null;
   const initialBounds = new google.maps.LatLngBounds(); // ! how to replace
-
-  // Initialize Google Maps and Marker Clusterer
-
   const linkZoom = parseInt(getQueryStringValue("zoom"), 10);
   const initialZoom = [token, organization, treeid, donor].some(
     val => val != null
@@ -54,16 +43,18 @@ export const MapContainer = ({ center, google, initialCenter }) => {
     ? 10
     : linkZoom || 6; // ! i dont like this
 
-  const [currentZoom, setCurrentZoom] = useState(initialZoom); // ! not sure i want to do like this...
+  // ! not sure i want to do like this...
+  const [currentZoom, setCurrentZoom] = useState(initialZoom);
+  const [shouldFetchMarkers, setShouldFetchMarkers] = useState(true);
 
   // const onMarkerClick = () => {}; // * optional func for markers
 
   useEffect(() => {
     google.maps.event.addListener(map, "dragstart", () => {
-      fetchMarkers = true;
+      setShouldFetchMarkers(true);
     });
     google.maps.event.addListener(map, "zoom_changed", () => {
-      fetchMarkers = true;
+      setShouldFetchMarkers(true);
     });
   });
 
@@ -75,16 +66,20 @@ export const MapContainer = ({ center, google, initialCenter }) => {
       setCurrentZoom(zoomLevel);
 
       // no need to load this up at every tiny movement
-      if (fetchMarkers) {
+      if (shouldFetchMarkers) {
         req = initMarkers(
           currentZoom,
+          firstRender,
           initialBounds,
           markerByPointId,
+          markers,
           organization,
           points,
           req,
+          setShouldFetchMarkers,
           token,
           treeid,
+          treeInfoDivShowing,
           toUrlValueLonLat(getViewportBounds(1.1)),
           zoomLevel
         );
@@ -108,10 +103,10 @@ export const MapContainer = ({ center, google, initialCenter }) => {
     bounds.extend(points[i]);
   }
 
-  const theZoomIs = map.getZoom() - 1; // <----------
-  if (map.getZoom() > 15) {
-    map.setZoom(15);
-  }
+  // const theZoomIs = map.getZoom() - 1; // ? <----------
+  // if (map.getZoom() > 15) {
+  //   map.setZoom(15);
+  // }
 
   return (
     <Map
@@ -127,7 +122,7 @@ export const MapContainer = ({ center, google, initialCenter }) => {
       // streetViewControl={false}
       // fullscreenControl={false}
     >
-      <Marker onClick={onMarkerClick} name="Current location" />
+      {/* <Marker onClick={onMarkerClick} name="Current location" /> */}
     </Map>
   );
 };

@@ -1,19 +1,43 @@
 import $ from "jquery";
 
+import { getCircularPointIndex } from "./utils";
+
 // using an index, get the point and marker and show them
-const showMarkerInfoByIndex = (index, markerByPointId, points) => {
+const showMarkerInfoByIndex = (
+  index,
+  markerByPointId,
+  points,
+  setShouldFetchMarkers,
+  treeInfoDivShowing
+) => {
   const point = points[index];
   const marker = markerByPointId[point.id];
-  showMarkerInfo(point, marker, index);
+  showMarkerInfo(
+    index,
+    marker,
+    markerByPointId,
+    point,
+    points,
+    setShouldFetchMarkers,
+    treeInfoDivShowing
+  );
 };
 
 // set up and show the marker info
-const showMarkerInfo = (points, point, marker, markerByPointId, index) => {
+const showMarkerInfo = (
+  index,
+  marker,
+  markerByPointId,
+  point,
+  points,
+  setShouldFetchMarkers,
+  treeInfoDivShowing
+) => {
   const YES = "YES";
   const NO = "NO";
 
   $("#tree_info_div").show("slide", "swing", 600);
-  if (treeInfoDivShowing == false) {
+  if (treeInfoDivShowing === false) {
     treeInfoDivShowing = true;
     $("#map-canvas").animate(
       {
@@ -56,27 +80,52 @@ const showMarkerInfo = (points, point, marker, markerByPointId, index) => {
   $("#tree_next")
     .off("click")
     .on("click", () => {
-      fetchMarkers = false;
+      setShouldFetchMarkers(false);
       const index = parseInt($(this).val(), 10);
-      showMarkerInfoByIndex(index, markerByPointId, points);
+      showMarkerInfoByIndex(
+        index,
+        markerByPointId,
+        points,
+        setShouldFetchMarkers,
+        treeInfoDivShowing
+      );
     });
 
   $("#tree_prev")
     .off("click")
     .on("click", () => {
-      fetchMarkers = false;
+      setShouldFetchMarkers(false);
       const index = parseInt($(this).val(), 10);
-      showMarkerInfoByIndex(index, markerByPointId, points);
+      showMarkerInfoByIndex(
+        index,
+        markerByPointId,
+        points,
+        setShouldFetchMarkers,
+        treeInfoDivShowing
+      );
     });
 };
 
-export const setPointMarkerListeners = (markerByPointId, points) => {
+export const setPointMarkerListeners = (
+  markerByPointId,
+  points,
+  setShouldFetchMarkers,
+  treeInfoDivShowing
+) => {
   points.sort((a, b) => a._sort_field - b._sort_field);
 
   $.each(points, (i, point) => {
     const marker = markerByPointId[point.id];
     google.maps.event.addListener(marker, "click", () => {
-      showMarkerInfo(points, point, marker, markerByPointId, i);
+      showMarkerInfo(
+        i,
+        marker,
+        markerByPointId,
+        point,
+        points,
+        setShouldFetchMarkers,
+        treeInfoDivShowing
+      );
     });
   });
 };

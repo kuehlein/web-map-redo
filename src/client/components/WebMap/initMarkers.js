@@ -10,30 +10,21 @@ import {
   getQueryStringValue
 } from "./utils";
 
-/**
- * ! ----------------------------*Future Props*---------------------------------
- */
-
-const treetrackerApiUrl =
-  "http://localhost:8080/api/web/" || "http://dev.treetracker.org/api/web/"; // ! value from config?
-
-const firstRender = true;
-
-/**
- * ! ---------------------------------------------------------------------------
- */
-
 // ! fuck dude this is nuts
 // Get the tree data and create markers with corresponding data // ! onwindowload...
 export const initMarkers = (
   currentZoom,
+  firstRender,
   initialBounds,
   markerByPointId,
+  markers,
   organization,
   points,
   req = null,
+  setShouldFetchMarkers,
   token,
   treeid,
+  treeInfoDivShowing,
   viewportBounds,
   zoomLevel
 ) => {
@@ -49,14 +40,12 @@ export const initMarkers = (
     organization,
     token,
     treeid,
-    treetrackerApiUrl,
     viewportBounds,
     zoomLevel
   );
 
-  // * new req
+  // * new req --- async --- axios/fetch?
   return $.get(queryUrl, data => {
-    // async request
     // clear everything // ! should this be set on context?
     points = [];
     markerByPointId = {};
@@ -70,9 +59,6 @@ export const initMarkers = (
           centroid.coordinates[1],
           centroid.coordinates[0]
         );
-        if (firstRender) {
-          initialBounds.extend(latLng);
-        }
 
         /* eslint-disable react/jsx-filename-extension */
         const marker = (
@@ -117,10 +103,15 @@ export const initMarkers = (
       }
 
       // set he markers once we are done
-      setPointMarkerListeners(markerByPointId, points); // ! fetchMarkers is set here
+      setPointMarkerListeners(
+        markerByPointId,
+        points,
+        setShouldFetchMarkers,
+        treeInfoDivShowing
+      );
 
       if (firstRender) {
-        initialBounds.extend(latLng);
+        initialBounds.extend(latLng); // ! which one to use?
 
         if (
           data.data.length > 0 &&
