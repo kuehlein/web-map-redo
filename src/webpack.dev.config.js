@@ -1,4 +1,3 @@
-const CleanWebpackPlugin = require("clean-webpack-plugin");
 const ExtractCssChunks = require("extract-css-chunks-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
@@ -13,7 +12,6 @@ const include = path.resolve(__dirname, "client");
 
 // development plugins
 const plugins = [
-  new CleanWebpackPlugin(),
   new webpack.HotModuleReplacementPlugin(),
   new ExtractCssChunks({
     chunkFilename: "[id].[hash].css",
@@ -25,11 +23,17 @@ const plugins = [
     favicon: path.resolve(__dirname, ...rootDir, "public", "favicon.ico"),
     template: path.resolve(__dirname, ...rootDir, "public", "index.html")
   })
+  // new webpack.DefinePlugin({})
 ];
+
+// optimization configuration for code splitting
+const splitChunks = {
+  chunks: "async"
+};
 
 const devConfig = {
   context: path.resolve(__dirname, ...rootDir),
-  devtool: "cheap-module-eval-source-map",
+  devtool: "inline-source-map", // "cheap-module-eval-source-map",
   entry: {
     client: ["webpack-hot-middleware/client", include] // /patch
   },
@@ -38,34 +42,39 @@ const devConfig = {
     rules: [
       {
         exclude,
-        loader: "style-loader",
-        test: /\.css$/
-      },
-      {
-        exclude,
-        loader: "css-loader",
-        options: {
-          modules: true
-        },
-        test: /\.css$/
-      },
-      {
-        test: /\.(jpg|png|gif|svg)$/,
+        include,
+        test: /\.scss$/,
         use: [
+          "style-loader",
           {
-            loader: "file-loader",
+            loader: "css-loader",
             options: {
-              name: "[name].[ext]",
-              outputPath: "../public/assets/media/",
-              publicPath: "../public/assets/media/"
+              modules: true,
+              camelCase: true,
+              sourceMap: true
+            }
+          },
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: true
             }
           }
         ]
       },
       {
+        loader: "file-loader",
+        options: {
+          name: "[name].[ext]",
+          outputPath: "assets/media/",
+          publicPath: "../public/assets/media/"
+        },
+        test: /\.(jpg|png|gif|svg)$/
+      },
+      {
         exclude,
         include,
-        loaders: "babel-loader",
+        loader: "babel-loader",
         test: /\.jsx?$/
       },
       {
@@ -77,11 +86,12 @@ const devConfig = {
     ]
   },
   optimization: {
-    nodeEnv: "development"
+    nodeEnv: "development",
+    splitChunks
   },
   output: {
+    chunkFilename: "[name].[hash].js",
     filename: "[name].[hash].bundle.js",
-    path: path.resolve(__dirname, ...rootDir, "public", "dist"),
     publicPath: "/"
   },
   plugins,

@@ -29,21 +29,21 @@ class Server {
   static configurations(env) {
     // * Note: You may need sudo to run on port 443
     const configurationOptions = {
-      development: { hostname: "localhost", port: 8080, ssl: false },
+      development: { hostname: "localhost", port: 9000, ssl: false },
       production: { hostname: "example.com", port: 443, ssl: true }
     };
     return configurationOptions[env];
   }
 
-  constructor() {
+  constructor(NODE_ENV = "production", HMR = "enabled") {
     // instance of the express server
     this.app = express();
 
     // enviornment variable determining type of enviornment, either `"production"` or `"developemnt"`
-    this.NODE_ENV = process.env.NODE_ENV || "production";
+    this.NODE_ENV = NODE_ENV;
 
     // If `enabled`, Hot Module Replacement is active. Enable *FOR DEVELOPMENT ONLY*
-    this.HMR = process.env.HMR === "enabled" ? "enabled" : "disabled";
+    this.HMR = HMR;
 
     // configuration settings being used based on `this.NODE_ENV`
     this.config = Server.configurations(this.NODE_ENV);
@@ -59,6 +59,14 @@ class Server {
           this.app
         )
       : http.createServer(this.app);
+  }
+
+  /**
+   * Based on environment variables, this will invoke and return either
+   * `createAppDev` or `createAppProd`.
+   */
+  createApp() {
+    return this.config.ssl ? this.createAppProd() : this.createAppDev();
   }
 
   /**
@@ -129,7 +137,7 @@ class Server {
    * Handles any unhandled errors that have been passed down from `api`.
    */
   errorHandlingEndware() {
-    this.app.use((err, req, res) => {
+    this.app.use((req, res, next, err) => {
       console.error(err);
       console.error(err.stack);
       res
@@ -158,7 +166,6 @@ class Server {
    */
   bundlingMiddleware() {
     const compiler = webpack(config);
-
     this.app.use(
       webpackDevMiddleware(compiler, {
         logLevel: "warn",
@@ -168,7 +175,6 @@ class Server {
         }
       })
     );
-
     this.app.use(
       webpackHotMiddleware(compiler, {
         heartbeat: 2000,
