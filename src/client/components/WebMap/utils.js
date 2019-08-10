@@ -1,6 +1,6 @@
 // * import from config --- CONSTANT
 const treetrackerApiUrl =
-  "http://localhost:8080/api/web/" || "http://dev.treetracker.org/api/web/";
+  "http://localhost:9000/api/" || "http://dev.treetracker.org/api/";
 
 export const getClusterRadius = zoom =>
   ({
@@ -113,10 +113,10 @@ export const buildQueryURL = (
   switch (true) {
     case currentZoom >= 4 &&
       !([token, organization, treeid].some(val => val != null) && firstRender):
-      queryUrl = `${queryUrl}&bounds=${viewportBounds}`;
+      // queryUrl = `${queryUrl}&bounds=${viewportBounds}`;
     /* eslint-disable-next-line no-fallthrough */
     case token != null:
-      queryUrl = `${queryUrl}&token=${token}`;
+      // queryUrl = `${queryUrl}&token=${token}`;
       break;
     case organization != null:
       queryUrl = `${queryUrl}&organization=${organization}`;

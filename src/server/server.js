@@ -9,8 +9,12 @@ const path = require("path");
 const webpack = require("webpack");
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
+const Sentry = require('@sentry/node');
 
 const config = require("../webpack.dev.config");
+const secrets = require('../secrets');
+
+Sentry.init({ dsn: secrets.sentryDSN });
 
 // const db = require("./db"); // ! not yet implemented
 
@@ -39,7 +43,7 @@ class Server {
     // instance of the express server
     this.app = express();
 
-    // enviornment variable determining type of enviornment, either `"production"` or `"developemnt"`
+    // environment variable determining type of environment, either `"production"` or `"development"`
     this.NODE_ENV = NODE_ENV;
 
     // If `enabled`, Hot Module Replacement is active. Enable *FOR DEVELOPMENT ONLY*
@@ -119,6 +123,9 @@ class Server {
     // logging middleware
     this.app.use(morgan("dev"));
 
+    // something from original web map server
+    this.app.use(Sentry.Handlers.requestHandler());
+
     // body parsing middleware
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
@@ -127,9 +134,10 @@ class Server {
     this.app.use(compression());
 
     // API - contains `/tree` route
-    // this.app.use('/api', require('./api')); // ! not yet implemented
+    this.app.use("/api", require("./api"));
 
     // Catch all error handling
+    this.app.use(Sentry.Handlers.errorHandler());
     this.errorHandlingEndware();
   }
 
@@ -191,7 +199,7 @@ class Server {
     // path to root directory
     const rootDir = ["..", ".."];
 
-    // staticly serve styles
+    // statically serve styles
     this.app.use(
       express.static(
         path.join(__dirname, ...rootDir, "src", "client", "main.css")

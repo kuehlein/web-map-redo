@@ -1,6 +1,6 @@
 /* project-wide css */
 
-body {
+/* body {
   font-family: "Lato", sans-serif;
   background-color: rgb(236, 239, 223);
 }
@@ -137,6 +137,7 @@ b {
 .page-loader {
   position: absolute;
   display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
   top: 0;
@@ -160,4 +161,4 @@ b {
   100% {
     transform: rotate(360deg);
   }
-}
+} */

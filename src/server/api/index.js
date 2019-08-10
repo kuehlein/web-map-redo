@@ -1,1 +1,3 @@
-// /trees will be linked in here...
+const trees = require("./trees");
+
+module.exports = trees;
