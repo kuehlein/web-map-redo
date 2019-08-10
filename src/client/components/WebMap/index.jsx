@@ -1,4 +1,4 @@
-import { GoogleApiWrapper, Map, Marker } from "google-maps-react";
+import { GoogleApiWrapper, InfoWindow, Map, Marker } from "google-maps-react";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import $ from "jquery";
@@ -14,7 +14,30 @@ import {
 // * what to do about `google` and `maps`?
 // ! -----
 
-export const MapContainer = ({ center, google, initialCenter }) => {
+//   // const theZoomIs = map.getZoom() - 1; // ? <----------
+//   // if (map.getZoom() > 15) {
+//   //   map.setZoom(15);
+//   // }
+
+export const WebMap = ({ google, initialCenter, zoom }) => {
+  // ! ??? context ???
+
+  // const what = document.getElementById("map-canvas");
+
+  // console.log("what?", what);
+
+  // const map = new google.maps.Map(
+  //   document.getElementById("map-canvas").firstChild,
+  //   {
+  //     fullscreenControl: false,
+  //     mapTypeControl: false,
+  //     mapTypeId: "hybrid",
+  //     minZoom: 6,
+  //     streetViewControl: false,
+  //     zoom
+  //   }
+  // );
+
   // ! context...
   const markerByPointId = {};
   const token = getQueryStringValue("token") || null;
@@ -22,20 +45,21 @@ export const MapContainer = ({ center, google, initialCenter }) => {
   const treeid = getQueryStringValue("treeid") || null;
   const donor = getQueryStringValue("donor") || null;
   const points = [
-    // ! grab from server
-    // { lat: 42.02, lng: -77.01 },
-    // { lat: 42.03, lng: -77.02 },
-    // { lat: 41.03, lng: -77.04 },
-    // { lat: 42.05, lng: -77.02 }
+    // ! grab from server --- temporary...
+    { lat: 42.02, lng: -77.01 },
+    { lat: 42.03, lng: -77.02 },
+    { lat: 41.03, lng: -77.04 },
+    { lat: 42.05, lng: -77.02 }
   ];
   const markers = []; // ! ???
 
   // ??????????????????
   const firstRender = true;
-  let treeInfoDivShowing = false;
+  const treeInfoDivShowing = false;
 
-  let req = null;
-  const initialBounds = new google.maps.LatLngBounds(); // ! how to replace
+  const req = null;
+
+  const initialBounds = new google.maps.LatLngBounds();
   const linkZoom = parseInt(getQueryStringValue("zoom"), 10);
   const initialZoom = [token, organization, treeid, donor].some(
     val => val != null
@@ -43,98 +67,119 @@ export const MapContainer = ({ center, google, initialCenter }) => {
     ? 10
     : linkZoom || 6; // ! i dont like this
 
+  // ! -------------------------------------------------------------------------
+  // ! -------------------------------------------------------------------------
+  // ! -------------------------------------------------------------------------
+
   // ! not sure i want to do like this...
   const [currentZoom, setCurrentZoom] = useState(initialZoom);
   const [shouldFetchMarkers, setShouldFetchMarkers] = useState(true);
 
-  // const onMarkerClick = () => {}; // * optional func for markers
+  // ! this is breaking shit...
+  // useEffect(() => {
+  //   // ! figure out a better way to handle this... vvv
+  //   const map = new google.maps.Map(
+  //     document.getElementById("map-canvas").firstChild,
+  //     {
+  //       fullscreenControl: false,
+  //       mapTypeControl: false,
+  //       mapTypeId: "hybrid",
+  //       minZoom: 6,
+  //       streetViewControl: false,
+  //       zoom
+  //     }
+  //   );
 
-  useEffect(() => {
-    google.maps.event.addListener(map, "dragstart", () => {
-      setShouldFetchMarkers(true);
-    });
-    google.maps.event.addListener(map, "zoom_changed", () => {
-      setShouldFetchMarkers(true);
-    });
-  });
+  //   google.maps.event.addListener(map, "dragstart", () => {
+  //     setShouldFetchMarkers(true);
+  //   });
+  //   google.maps.event.addListener(map, "zoom_changed", () => {
+  //     setShouldFetchMarkers(true);
+  //   });
+  // });
 
   // only fetch when the user has made some sort of action
-  useEffect(() => {
-    google.maps.event.addListener(map, "idle", () => {
-      const zoomLevel = map.getZoom();
-      console.log(`New zoom level: ${zoomLevel}`);
-      setCurrentZoom(zoomLevel);
+  // useEffect(() => {
+  //   // ! figure out a better way to handle this... vvv
+  //   const map = new google.maps.Map(
+  //     document.getElementById("map-canvas").firstChild,
+  //     {
+  //       fullscreenControl: false,
+  //       mapTypeControl: false,
+  //       mapTypeId: "hybrid",
+  //       minZoom: 6,
+  //       streetViewControl: false,
+  //       zoom
+  //     }
+  //   );
 
-      // no need to load this up at every tiny movement
-      if (shouldFetchMarkers) {
-        req = initMarkers(
-          currentZoom,
-          firstRender,
-          initialBounds,
-          markerByPointId,
-          markers,
-          organization,
-          points,
-          req,
-          setShouldFetchMarkers,
-          token,
-          treeid,
-          treeInfoDivShowing,
-          toUrlValueLonLat(getViewportBounds(1.1)),
-          zoomLevel
-        );
-      }
-    });
-  }, [setCurrentZoom]);
+  //   google.maps.event.addListener(map, "idle", () => {
+  //     // ! how to replace `map`?
+  //     const zoomLevel = map.getZoom();
+  //     console.log(`New zoom level: ${zoomLevel}`);
+  //     setCurrentZoom(zoomLevel);
 
-  // currentZoom = initialZoom;
-  map.setCenter({ lat: -3.33313276473463, lng: 37.142856230615735 });
+  //     console.log("\n\n\nmap", map.getBounds, "\n\n\n"); // ! getBounds is a function, but returns null...
 
-  $("#close-button").click(() => {
-    $("#tree_info_div").hide("slide", "swing", 600);
-    treeInfoDivShowing = false;
-    $("#map-canvas").css("margin-left", "0px");
-  });
+  //     // no need to load this up at every tiny movement
+  //     if (shouldFetchMarkers) {
+  //       req = initMarkers(
+  //         currentZoom,
+  //         firstRender,
+  //         initialBounds,
+  //         markerByPointId,
+  //         markers,
+  //         organization,
+  //         points,
+  //         req,
+  //         setShouldFetchMarkers,
+  //         token,
+  //         treeid,
+  //         treeInfoDivShowing,
+  //         toUrlValueLonLat(getViewportBounds(map, 1.1)), // ! <---
+  //         zoomLevel
+  //       );
+  //     }
+  //   });
+  // }, [setCurrentZoom]);
+
+  // setCurrentZoom(initialZoom); // currentZoom = initialZoom;
+  // map.setCenter({ lat: -3.33313276473463, lng: 37.142856230615735 });
+
+  // $("#close-button").click(() => {
+  //   $("#tree_info_div").hide("slide", "swing", 600);
+  //   treeInfoDivShowing = false;
+  //   $("#map-canvas").css("margin-left", "0px");
+  // });
 
   // ! -------------------------------------------------------------------------
 
-  const bounds = new google.maps.LatLngBounds();
-  for (let i = 0; i < points.length; i++) {
-    bounds.extend(points[i]);
-  }
-
-  // const theZoomIs = map.getZoom() - 1; // ? <----------
-  // if (map.getZoom() > 15) {
-  //   map.setZoom(15);
+  // const bounds = new google.maps.LatLngBounds();
+  // for (let i = 0; i < points.length; i++) {
+  //   bounds.extend(points[i]);
   // }
 
-  return (
-    <Map
-      bounds={bounds} // ! ----------
-      center={bounds.getCenter()}
-      google={google} // ? ---------------------
-      zoom={initialZoom}
+  // ! ----------------------* stuff from tutorial *----------------------------
+  // const [activeMarker, setActiveMarker] = useState({}); // Shows the active marker upon click
+  // const [selectedPlace, setSelectedPlace] = useState({}); // Shows the infoWindow to the selected place upon a marker
+  // const [showingInfoWindow, setShowingInfoWindow] = useState(false); // Hides or the shows the infoWindow
 
-      // ! these were on original map, don't seem to be in lib
-      // minZoom={6}
-      // mapTypeId="hybrid"
-      // mapTypeControl={false}
-      // streetViewControl={false}
-      // fullscreenControl={false}
-    >
-      {/* <Marker onClick={onMarkerClick} name="Current location" /> */}
-    </Map>
-  );
-};
+  // const onMarkerClick = (marker, props) => {
+  //   // setActiveMarker(marker);
+  //   // setSelectedPlace(props);
+  //   // setShowingInfoWindow(true);
+  // };
 
-export default GoogleApiWrapper({
-  apiKey: "AIzaSyBLHZL7-3Y5aNMlW_Cz5G1NyBn5R0Mmurs"
-})(MapContainer);
+  // const onClose = () => {
+  //   // if (showingInfoWindow) {
+  //   //   setShowingInfoWindow(false);
+  //   //   setActiveMarker(null);
+  //   // }
+  // };
+  // ! ----------------------* stuff from tutorial *----------------------------
 
-/**
- * Main thing...
- */
-const WebMap = ({ center, zoom }) => {
+  console.log("google", google);
+
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <div id="overlay" className="overlay_container">
@@ -204,16 +249,44 @@ const WebMap = ({ center, zoom }) => {
         </div>
       </div>
 
-      <GoogleMapReact
-        apiKey="AIzaSyBLHZL7-3Y5aNMlW_Cz5G1NyBn5R0Mmurs" // ?
-        // bootstrapURLKeys={{
-        //   key: "AIzaSyAyesbQMyKVVbBgKVi2g6VX7mop2z96jBo" // ?
-        // }}
-        defaultCenter={center}
-        defaultZoom={zoom}
-      >
-        {/* children appear on the map */}
-      </GoogleMapReact>
+      {/* // ! this is a pretty trashy way of doing this... */}
+      <div id="map-grand-parent">
+        <div id="map-canvas">
+          <Map
+            google={google} // ? --------------------------------
+            initialCenter={initialCenter}
+            style={{
+              width: "100%",
+              height: "100%"
+            }}
+            zoom={zoom}
+
+            //       bounds={bounds} // ! ----------
+            //       center={bounds.getCenter()}
+
+            // ! these were on original map, don't seem to be in lib
+            //       // minZoom={6}
+            //       // mapTypeId="hybrid"
+            //       // mapTypeControl={false}
+            //       // streetViewControl={false}
+            //       // fullscreenControl={false}
+          >
+            {/* <Marker
+              onClick={onMarkerClick}
+              name="Kenyatta International Convention Centre"
+            />
+            <InfoWindow
+              marker={activeMarker}
+              visible={showingInfoWindow}
+              onClose={onClose}
+            >
+              <div>
+                <h4>{selectedPlace.name}</h4>
+              </div>
+            </InfoWindow> */}
+          </Map>
+        </div>
+      </div>
 
       <div id="map-loader" className="page-loader active">
         <div className="loader" />
@@ -222,7 +295,19 @@ const WebMap = ({ center, zoom }) => {
   );
 };
 
-// export default WebMap;
+export default GoogleApiWrapper(({ zoom }) => ({
+  // ! this thing passes `google` as props
+  apiKey: "AIzaSyBLHZL7-3Y5aNMlW_Cz5G1NyBn5R0Mmurs",
+  initialCenter: {
+    lat: -3.33313276473463,
+    lng: 37.142856230615735
+  },
+  zoom
+}))(WebMap);
+
+// export default GoogleApiWrapper(({ apiKey }) => ({
+//   apiKey
+// })(WebMap)
 
 /**
  * *---------------------------------------------------------------------------*

@@ -59,8 +59,11 @@ export const toUrlValueLonLat = bounds => {
 // The offset parameter extends the bounds resulting rectangle by a certain percentage.
 // For example: 1.1 will return a rectangle with each point (N, S, E, W) 10% farther from the rectangle.
 // The offset specification might be useful for preloading trees around the visible area, taking advantage of a single request.
-export const getViewportBounds = offset => {
+export const getViewportBounds = (map, offset) => {
   const bounds = map.getBounds();
+
+  console.log("map in get viewport bounds...", map);
+  console.log("bounds in get viewport bounds...", bounds);
 
   if (offset) {
     offset--;
