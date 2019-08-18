@@ -1,7 +1,6 @@
 import { GoogleApiWrapper, InfoWindow, Map, Marker } from "google-maps-react";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
-import $ from "jquery";
 
 import { initMarkers } from "./initMarkers";
 import {
@@ -34,7 +33,6 @@ const WebMap = props => {
     { lat: 42.05, lng: -77.02 }
   ];
 
-  // ??????????????????
   const firstRender = true;
   const treeInfoDivShowing = false;
 
@@ -93,23 +91,25 @@ const WebMap = props => {
 
       // no need to load this up at every tiny movement
       if (shouldFetchMarkers) {
-        setMarkers(await initMarkers(
-          currentZoom,
-          firstRender,
-          initialBounds,
-          markerByPointId,
-          markers,
-          organization,
-          points,
-          setShouldFetchMarkers,
-          token,
-          treeid,
-          treeInfoDivShowing,
-          toUrlValueLonLat(getViewportBounds(map, 1.1)), // ! <---
-          zoomLevel,
-          map,
-          maps
-        ));
+        setMarkers(
+          await initMarkers(
+            currentZoom,
+            firstRender,
+            initialBounds,
+            markerByPointId,
+            markers,
+            organization,
+            points,
+            setShouldFetchMarkers,
+            token,
+            treeid,
+            treeInfoDivShowing,
+            toUrlValueLonLat(getViewportBounds(map, 1.1)), // ! <---
+            zoomLevel,
+            map,
+            maps
+          )
+        );
       }
     });
   }
@@ -241,8 +241,8 @@ const WebMap = props => {
       <div id="map-grand-parent">
         <div id="map-canvas">
           <Map
-            google={google} // ? --------------------------------
-            // initialCenter={initialCenter}
+            google={google}
+            // initialCenter={{lat: 37.4419, long: -122.1419}}
             style={{
               width: "100%",
               height: "100%"
@@ -256,7 +256,9 @@ const WebMap = props => {
                 { setShouldFetchMarkers, setCurrentZoom, setMarkers }
               )
             }
-
+            onZoomChanged={(ev) => {
+              console.log(ev)
+            }}
             //       center={bounds.getCenter()}
 
             // ! these were on original map, don't seem to be in lib
@@ -266,7 +268,7 @@ const WebMap = props => {
             //       // streetViewControl={false}
             //       // fullscreenControl={false}
           >
-            {markers}
+            {/* {markers} */}
             {/* <InfoWindow
               marker={activeMarker}
               visible={showingInfoWindow}

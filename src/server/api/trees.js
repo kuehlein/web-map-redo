@@ -7,8 +7,6 @@ const secrets = require("../../secrets");
 
 const pool = new Pool({ connectionString: secrets.connectionString });
 
-console.log(pool);
-
 router.get("/trees", function(req, res) {
   console.log(req.query);
   let token = req.query["token"];
@@ -173,7 +171,6 @@ router.get("/trees", function(req, res) {
   //   text: `SELECT 'cluster' AS type, region_id id, ST_ASGeoJson(centroid) centroid, type_id as region_type, count(id) FROM active_tree_region tree_region WHERE zoom_level = $1 GROUP BY region_id, centroid, type_id`,
   //   values: [`2`]
   // };
-
   pool
     .query(query)
     .then(function(data) {

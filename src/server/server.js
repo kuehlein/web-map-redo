@@ -12,9 +12,9 @@ const webpackHotMiddleware = require("webpack-hot-middleware");
 const Sentry = require('@sentry/node');
 
 const config = require("../webpack.dev.config");
-const secrets = require('../secrets');
+// const secrets = require('../secrets');
 
-Sentry.init({ dsn: secrets.sentryDSN });
+// Sentry.init({ dsn: secrets.sentryDSN });
 
 // const db = require("./db"); // ! not yet implemented
 

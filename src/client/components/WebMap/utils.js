@@ -92,9 +92,9 @@ export const getViewportBounds = (map, offset) => {
 // clear the markers from the map and then clear our the array of markers
 export const clearOverlays = overlays => {
   for (let i = 0; i < overlays.length; i++) {
-    overlays[i].setMap(null);
+    // overlays[i].setMap(null);
   }
-  overlays.length = 0; // ! clears the array... dont do this pls
+  // overlays.length = 0; // ! clears the array... dont do this pls
 };
 
 // ! this still needs work --- just pulled it out

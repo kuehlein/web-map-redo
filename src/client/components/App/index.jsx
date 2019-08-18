@@ -1,11 +1,11 @@
-import React from "react";
-import { withRouter } from "react-router-dom";
+import React, { createContext } from "react";
 
 // * import app.css before other components to apply styles
 import "./app.css";
 
-import Main from "./Main";
-import Routes from "./Routes";
+import { WebMap } from "..";
+
+const Context = createContext();
 
 /**
  * Top level component of app. Wrapped with providers and rendered by
@@ -14,11 +14,9 @@ import Routes from "./Routes";
  * @returns {*} ReactElement<any>
  */
 const App = () => (
-  <div style={{ backgroundColor: "green" }}>
-    <Main>
-      <Routes />
-    </Main>
-  </div>
+  <Context.Provider>
+    <WebMap />
+  </Context.Provider>
 );
 
-export default withRouter(App);
+export default App;

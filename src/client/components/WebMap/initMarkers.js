@@ -1,6 +1,6 @@
-import { Marker } from "google-maps-react";
-import $ from "jquery";
+// import { Marker } from "google-maps-react";
 import React from "react";
+import MarkerClusterer from "@google/markerclustererplus";
 
 import { setPointMarkerListeners } from "./showMarkerInfo";
 import {
@@ -10,7 +10,6 @@ import {
   getQueryStringValue
 } from "./utils";
 
-// ! fuck dude this is nuts
 // Get the tree data and create markers with corresponding data // ! onwindowload...
 export const initMarkers = async (
   currentZoom,
@@ -29,6 +28,8 @@ export const initMarkers = async (
   map,
   maps
 ) => {
+  // TODO: move this somewhere where you set all map properties
+  map.setMapTypeId("hybrid");
   // if (req != null) req.abort(); // * can req be a falsy non-null value?
 
   const clusterRadius =
@@ -44,42 +45,35 @@ export const initMarkers = async (
     zoomLevel
   );
 
-  // * new req --- async --- axios/fetch?
-  const response = await $.get(queryUrl);
+  // * new req --- async --- axios/fetch?s
+  const initResponse = await fetch(queryUrl);
+  const response = await initResponse.json();
   const data = response.data;
   // clear everything // ! should this be set on context?
   points = [];
   markerByPointId = {};
   clearOverlays(markers);
-  console.log(data);
   data.forEach(item => {
     // ! where does data come from?
     const centroid = JSON.parse(item.centroid);
-    let latLng = {lat: centroid.coordinates[1], lng: centroid.coordinates[0]};
-    console.log(latLng);
+    let latLng = { lat: centroid.coordinates[1], lng: centroid.coordinates[0] };
     let marker;
     if (item.type === "cluster") {
       /* eslint-disable react/jsx-filename-extension */
-      console.log(...centroid.coordinates);
-      marker = (
-        <Marker
-          key={item.id}
-          position={latLng}
-          map={map}
-          label={{
-            text: item.count.toString(),
-            color: "black"
-          }}
-          icon={{
-            url: "./img/blank_pin.png",
-            // labelOrigin: maps.Point(...centroid.coordinates)
-          }}
-          onClick={() => {
-            map.setZoom(zoomLevel + 2);
-            map.panTo(marker.position);
-          }}
-        />
-      );
+      marker = new google.maps.Marker({
+        // map,
+        // label: {
+        //   text: item.count.toString(),
+        //   color: "white"
+        // },
+        position: latLng
+      });
+      // onClick={() => {
+      // }}
+      // marker.addListener("click", () => {
+      //   map.setZoom(zoomLevel + 2);
+      //   map.panTo(marker.position);
+      // });
     } else if (item.type === "point") {
       latLng = maps.LatLng(item.lat, item.lon);
 
@@ -88,7 +82,7 @@ export const initMarkers = async (
           position={latLng}
           map={map}
           title="Tree"
-          icon={{ url: "./img/blank_pin.png" }}
+          icon={{ url: "../../../../public/assets/media/blank_pin.png" }}
         />
       );
 
@@ -101,31 +95,50 @@ export const initMarkers = async (
     }
     markers.push(marker);
   });
-  return markers;
+  const markerClusterer = new MarkerClusterer(map, markers, {
+    // labelOrigin: maps.Point(...centroid.coordinates)
+  });
+  markerClusterer.addListener("clusteringend", ev => {
+    markerClusterer.addListener("click", cluster => {
+      const clusterCenter = cluster.center_;
+      const lat = clusterCenter.lat();
+      const lng = clusterCenter.lng();
+      const map = cluster.map_;
+      map.setZoom(zoomLevel + 2);
+      map.panTo({lat, lng});
+    });
+    //   const clusters = ev.clusters_;
+    //   clusters.forEach(cluster => {
+    //     console.log(cluster)
+    //   google.maps.event.addListener(cluster, 'click', console.log)
+    //   // cluster.addListener('click', (ev) => console.log(ev))
+    // })
+  });
+  // setPointMarkerListeners(
+  //   markerByPointId,
+  //   points,
+  //   setShouldFetchMarkers,
+  //   treeInfoDivShowing
+  // );
+
+  // if (firstRender) {
+  //   // initialBounds.extend(latLng); // ! which one to use?
+
+  //   if (
+  //     data.length > 0 &&
+  //     (organization != null || token != null || treeid != null)
+  //   ) {
+  //     map.fitBounds(initialBounds);
+  //     map.setCenter(initialBounds.getCenter());
+  //     map.setZoom(map.getZoom() - 1);
+  //     if (map.getZoom() > 15) {
+  //       map.setZoom(15);
+  //     }
+  //   }
+
+  //   firstRender = false;
+  // }
+  // return markers;
 
   // set he markers once we are done
-  setPointMarkerListeners(
-    markerByPointId,
-    points,
-    setShouldFetchMarkers,
-    treeInfoDivShowing
-  );
-
-  if (firstRender) {
-    // initialBounds.extend(latLng); // ! which one to use?
-
-    if (
-      data.data.length > 0 &&
-      (organization != null || token != null || treeid != null)
-    ) {
-      map.fitBounds(initialBounds);
-      map.setCenter(initialBounds.getCenter());
-      map.setZoom(map.getZoom() - 1);
-      if (map.getZoom() > 15) {
-        map.setZoom(15);
-      }
-    }
-
-    firstRender = false;
-  }
 };
