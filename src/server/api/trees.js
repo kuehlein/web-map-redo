@@ -8,7 +8,6 @@ const secrets = require("../../secrets");
 const pool = new Pool({ connectionString: secrets.connectionString });
 
 router.get("/trees", function(req, res) {
-  console.log(req.query);
   let token = req.query["token"];
   let organization = req.query["organization"];
   let flavor = req.query["flavor"];
@@ -55,11 +54,9 @@ router.get("/trees", function(req, res) {
       ", 4326) ";
     clusterBoundingBoxQuery =
       "AND location && ST_MakeEnvelope(" + bounds + ", 4326) ";
-    console.log(bounds);
   }
 
   let clusterRadius = parseFloat(req.query["clusterRadius"]);
-  console.log(clusterRadius);
   var sql, query;
   const zoomLevel = req.query["zoom_level"];
   if (parseInt(zoomLevel) > 15 || treeid != null) {
@@ -81,13 +78,11 @@ router.get("/trees", function(req, res) {
       boundingBoxQuery +
       filter +
       joinCriteria;
-    console.log(sql);
 
     query = {
       text: sql
     };
   } else if (subset) {
-    console.log("Calculating clusters directly");
     sql =
       `SELECT 'cluster'                                           AS type,
        St_asgeojson(St_centroid(clustered_locations))                 centroid,
@@ -117,18 +112,15 @@ router.get("/trees", function(req, res) {
     query = {
       text: sql
     };
-    console.log(query);
   } else {
     // check if query is in the cached zone
     var boundingBox;
     if (bounds) {
       boundingBox = bounds.split(",");
-      console.log(boundingBox);
     }
 
     var regionBoundingBoxQuery = "";
 
-    console.log(zoomLevel);
     if (zoomLevel >= 10) {
       console.log("greater eq 10");
 
@@ -166,15 +158,9 @@ router.get("/trees", function(req, res) {
       };
     }
   }
-  console.log(query);
-  // const hardcodedQuery = {
-  //   text: `SELECT 'cluster' AS type, region_id id, ST_ASGeoJson(centroid) centroid, type_id as region_type, count(id) FROM active_tree_region tree_region WHERE zoom_level = $1 GROUP BY region_id, centroid, type_id`,
-  //   values: [`2`]
-  // };
   pool
     .query(query)
     .then(function(data) {
-      console.log("data: ", data);
       console.log("ok");
       res.status(200).json({
         data: data.rows
