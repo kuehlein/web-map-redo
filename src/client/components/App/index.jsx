@@ -1,9 +1,12 @@
-import React, { createContext } from "react";
+import React, { createContext, useState } from "react";
 
 // * import app.css before other components to apply styles
-import "./app.css";
+// import "./app.css";
 
 import { WebMap } from "..";
+import { InfoWindow } from "@react-google-maps/api";
+
+import './app.module.scss';
 
 const Context = createContext();
 
@@ -13,10 +16,22 @@ const Context = createContext();
  *
  * @returns {*} ReactElement<any>
  */
-const App = () => (
-  <Context.Provider>
-    <WebMap />
-  </Context.Provider>
-);
+const App = () => {
+  const [showInfoWindow, setShowInfoWindow] = useState(false);
+  const [infoWindowData, setInfoWindowData] = useState(null);
+  console.log(showInfoWindow, infoWindowData)
+  return (
+    <Context.Provider>
+      <main>
+        <div className="test">THIS WORKS</div>
+        {showInfoWindow && <InfoWindow infoWindowData={infoWindowData} />}
+        <WebMap
+          setShowInfoWindow={setShowInfoWindow}
+          setInfoWindowData={setInfoWindowData}
+        />
+      </main>
+    </Context.Provider>
+  );
+};
 
 export default App;

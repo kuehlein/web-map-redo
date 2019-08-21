@@ -5,6 +5,8 @@ import { GoogleMap, useLoadScript } from "@react-google-maps/api";
 import MarkerClusterer from "../MarkerClusterer";
 import createMarkers from "./createMarkers";
 
+import './webMap.module.scss';
+
 function getCurrentCenterOfMap(map) {
   // Only during the initial render when the map has not yet loaded
   if (!map) {
@@ -25,11 +27,12 @@ function getCurrentCenterOfMap(map) {
 async function handleMapMovement(map, setMarkers) {
   if (map) {
     const zoomLevel = map.getZoom();
-    setMarkers(await createMarkers(zoomLevel, map));
+    const markers = await createMarkers(zoomLevel, map);
+    setMarkers(markers);
   }
 }
 
-const WebMap = () => {
+const WebMap = ({ setShowInfoWindow, setInfoWindowData }) => {
   // Set main state of component
   const [markers, setMarkers] = useState([]);
   const [map, setMap] = useState(null);
@@ -39,7 +42,9 @@ const WebMap = () => {
   // the query to get the markers to run asynchronously.
   useEffect(() => {
     async function fetchInitialMarkers() {
-      setMarkers(await createMarkers(2, map));
+      const DEFAULT_ZOOM_LEVEL = 2;
+      const initMarkers = await createMarkers(DEFAULT_ZOOM_LEVEL, map);
+      setMarkers(initMarkers);
     }
     fetchInitialMarkers();
   }, []);
@@ -65,7 +70,9 @@ const WebMap = () => {
         onDragEnd={() => handleMapMovement(map, setMarkers)}
         onZoomChanged={() => handleMapMovement(map, setMarkers)}
       >
-        <MarkerClusterer {...{ markers, map, setCenter }} />
+        <MarkerClusterer
+          {...{ markers, map, setCenter, setShowInfoWindow, setInfoWindowData }}
+        />
       </GoogleMap>
     );
   };

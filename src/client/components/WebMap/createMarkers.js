@@ -1,3 +1,5 @@
+import startCase from "lodash/startCase";
+
 import {
   buildQueryURL,
   getClusterRadius,
@@ -83,7 +85,25 @@ function getClusters(clusters) {
 function getPoints(points) {
   return points.map(point => {
     const { lat, lon, id } = point;
-    const pointData = { id, lat: Number(lat), lng: Number(lon), type: "point" };
+    const planterName = `${point.first_name} ${point.last_name[0]}`;
+    const treeImage = point.image_url;
+    const planterImage = point.user_image_url
+      ? point.user_image_url
+      : "../../../../assets/media/portrait_placeholder_100.png";
+    const status = startCase(point.status);
+    const dateTracked = new Date(point.time_updated).toDateString().slice(4);
+
+    const pointData = {
+      id,
+      lat: Number(lat),
+      lng: Number(lon),
+      type: "point",
+      planterName,
+      treeImage,
+      planterImage,
+      status,
+      dateTracked
+    };
     return pointData;
   });
 }
@@ -91,6 +111,7 @@ function getPoints(points) {
 const createMarkers = async (zoomLevel, map) => {
   // Create query url
   const queryUrl = createQueryString(zoomLevel, map);
+  console.log(queryUrl);
 
   // Query
   let initResponse;
@@ -102,16 +123,19 @@ const createMarkers = async (zoomLevel, map) => {
   }
   const response = await initResponse.json();
   const { data } = response;
-  console.log(data[0]);
-  const clusters = data[0].type === "cluster";
-  let markers = [];
-  if (clusters) {
-    markers = getClusters(data);
-  } else {
-    markers = getPoints(data);
+
+  if (data && data.length > 0) {
+    console.log(data)
+    const clusters = data[0].type === "cluster";
+    let markers = [];
+    if (clusters) {
+      markers = getClusters(data);
+    } else {
+      markers = getPoints(data);
+    }
+    return markers;
   }
-  console.log(markers);
-  return markers;
+  return [];
 };
 
 export default createMarkers;

@@ -158,6 +158,7 @@ router.get("/trees", function(req, res) {
       };
     }
   }
+  // TODO: make query only get necessary data
   pool
     .query(query)
     .then(function(data) {

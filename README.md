@@ -142,10 +142,4 @@ map.js:18 Uncaught ReferenceError: configTreetrackerApi is not defined
 
 ## Features needed
 
-- Max zoom level (prevent user from being able to zoom beyond the boundaries of earth)
-- Make earth map look more natural
-- Initial load:
-  - zoom level: 2
-  - cluster radius: 8
-- Initial click
-  - both are 4 and you get entirely different view of trees
+- Conditionally choose cluster images

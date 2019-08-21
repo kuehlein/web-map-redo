@@ -2,6 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { MarkerClusterer, Marker } from "@react-google-maps/api";
 
+import './markerClusterer.module.scss';
+
 function selectIcon(type) {
   if (type === "point") {
     return "https://raw.githubusercontent.com/Greenstand/treetracker-web-map/master/client/img/pin_32px.png";
@@ -9,8 +11,7 @@ function selectIcon(type) {
   return "https://raw.githubusercontent.com/Greenstand/treetracker-web-map/master/client/img/cluster_46px.png";
 }
 
-function zoomOnClick({ latLng }, map, setCenter) {
-  const { lat, lng } = latLng;
+function zoomOnClick({ latLng: { lat, lng } }, map, setCenter) {
   const latitude = lat();
   const longitude = lng();
   const currentZoom = map.getZoom();
@@ -18,33 +19,64 @@ function zoomOnClick({ latLng }, map, setCenter) {
   setCenter({ lat: latitude, lng: longitude });
 }
 
-export default function MarkerClustererComponent({ markers, map, setCenter }) {
+export default function MarkerClustererComponent({
+  markers,
+  map,
+  setCenter,
+  setShowInfoWindow,
+  setInfoWindowData
+}) {
+  console.log(markers);
   const clusters = markers && markers.length && markers[0].type === "cluster";
   let icon = "";
-  let minClusterSize;
   if (clusters) {
     icon = selectIcon("cluster");
   } else {
-    console.log('whats up')
     icon = selectIcon("point");
-    minClusterSize = 1;
   }
-  console.log(minClusterSize)
   return (
-    <MarkerClusterer averageCenter>
+    <MarkerClusterer averageCenter minimumClusterSize={Infinity}>
       {clusterer =>
-        markers.map(({ lat, lng, count, id }) => (
-          <Marker
-            key={id}
-            position={{ lat, lng }}
-            clusterer={clusterer}
-            animation={google.maps.Animation.DROP}
-            title="Tree"
-            label={clusters ? String(count) : null}
-            icon={icon}
-            onClick={event => zoomOnClick(event, map, setCenter)}
-          />
-        ))
+        markers.map(
+          ({
+            lat,
+            lng,
+            count,
+            id,
+            type,
+            planterName,
+            treeImage,
+            planterImage,
+            status,
+            dateTracked
+          }) => (
+            <Marker
+              className="test"
+              key={id}
+              position={{ lat, lng }}
+              clusterer={clusterer}
+              title="Tree"
+              label={clusters ? String(count) : null}
+              icon={icon}
+              onClick={event => {
+                console.log(type)
+                if (type === "cluster") {
+                  zoomOnClick(event, map, setCenter);
+                } else {
+                  setInfoWindowData({
+                    planterName,
+                    treeImage,
+                    planterImage,
+                    status,
+                    dateTracked,
+                    treeId: id
+                  });
+                  setShowInfoWindow(true);
+                }
+              }}
+            />
+          )
+        )
       }
     </MarkerClusterer>
   );
