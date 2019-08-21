@@ -138,3 +138,8 @@ map.js:18 Uncaught ReferenceError: configTreetrackerApi is not defined
     at map.js:18
 
 **Solution**: To Solve this issue, go into the client/js folder, and either change the file config.js.example to config.js, or copy it into a file of the same name.
+
+
+## Features needed
+
+- Conditionally choose cluster images

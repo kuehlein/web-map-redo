@@ -13,12 +13,12 @@ const include = path.resolve(__dirname, "client");
 // development plugins
 const plugins = [
   new webpack.HotModuleReplacementPlugin(),
-  new ExtractCssChunks({
-    chunkFilename: "[id].[hash].css",
-    cssModules: true,
-    filename: "[name].[hash].css",
-    hot: true
-  }),
+  // new ExtractCssChunks({
+  //   chunkFilename: "[id].[hash].css",
+  //   cssModules: true,
+  //   filename: "[name].[hash].css",
+  //   hot: true
+  // }),
   new HtmlWebpackPlugin({
     favicon: path.resolve(__dirname, ...rootDir, "public", "favicon.ico"),
     template: path.resolve(__dirname, ...rootDir, "public", "index.html")
@@ -43,13 +43,13 @@ const devConfig = {
       {
         exclude,
         include,
-        test: /\.scss$/,
+        test: /\.(sa|sc|c)ss$/,
         use: [
-          "style-loader",
+          { loader: 'style-loader' },
           {
             loader: "css-loader",
             options: {
-              modules: true,
+              // modules: true, // ! why is this breaking things...
               camelCase: true,
               sourceMap: true
             }

@@ -1,11 +1,14 @@
-import React from "react";
-import { withRouter } from "react-router-dom";
+import React, { createContext, useState } from "react";
 
 // * import app.css before other components to apply styles
-import "./app.css";
+// import "./app.css";
 
-import Main from "./Main";
-import Routes from "./Routes";
+import { WebMap } from "..";
+import { InfoWindow } from "@react-google-maps/api";
+
+import './app.module.scss';
+
+const Context = createContext();
 
 /**
  * Top level component of app. Wrapped with providers and rendered by
@@ -13,12 +16,22 @@ import Routes from "./Routes";
  *
  * @returns {*} ReactElement<any>
  */
-const App = () => (
-  <div style={{ backgroundColor: "green" }}>
-    <Main>
-      <Routes />
-    </Main>
-  </div>
-);
+const App = () => {
+  const [showInfoWindow, setShowInfoWindow] = useState(false);
+  const [infoWindowData, setInfoWindowData] = useState(null);
+  console.log(showInfoWindow, infoWindowData)
+  return (
+    <Context.Provider>
+      <main>
+        <div className="test">THIS WORKS</div>
+        {showInfoWindow && <InfoWindow infoWindowData={infoWindowData} />}
+        <WebMap
+          setShowInfoWindow={setShowInfoWindow}
+          setInfoWindowData={setInfoWindowData}
+        />
+      </main>
+    </Context.Provider>
+  );
+};
 
-export default withRouter(App);
+export default App;

@@ -1,6 +1,6 @@
 // * import from config --- CONSTANT
 const treetrackerApiUrl =
-  "http://localhost:8080/api/web/" || "http://dev.treetracker.org/api/web/";
+  "http://localhost:9000/api/" || "http://dev.treetracker.org/api/";
 
 export const getClusterRadius = zoom =>
   ({
@@ -36,11 +36,12 @@ export const getCircularPointIndex = (index, points) => {
 };
 
 export const getQueryStringValue = (name, url) => {
-  if (!url) url = window.location.href;
-  name = name.replace(/[[\]]/g, "\\$&");
+  let newUrl;
+  if (!url) newUrl = window.location.href;
+  const newName = name.replace(/[[\]]/g, "\\$&");
 
-  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
-  const results = regex.exec(url);
+  const regex = new RegExp(`[?&]${newName}(=([^&#]*)|&|#|$)`);
+  const results = regex.exec(newUrl);
 
   if (!results) return null;
   if (!results[2]) return "";
@@ -62,19 +63,16 @@ export const toUrlValueLonLat = bounds => {
 export const getViewportBounds = (map, offset) => {
   const bounds = map.getBounds();
 
-  console.log("map in get viewport bounds...", map);
-  console.log("bounds in get viewport bounds...", bounds);
-
   if (offset) {
-    offset--;
+    const decreasedOffset = offset - 1;
     const east = bounds.getNorthEast().lng();
     const west = bounds.getSouthWest().lng();
     const north = bounds.getNorthEast().lat();
     const south = bounds.getSouthWest().lat();
 
     // Get the longitude and latitude differences
-    const longitudeDifference = (east - west) * offset;
-    const latitudeDifference = (north - south) * offset;
+    const longitudeDifference = (east - west) * decreasedOffset;
+    const latitudeDifference = (north - south) * decreasedOffset;
 
     // Move each point farther outside the rectangle
     // To west
@@ -89,34 +87,23 @@ export const getViewportBounds = (map, offset) => {
   return bounds;
 };
 
-// clear the markers from the map and then clear our the array of markers
-export const clearOverlays = overlays => {
-  for (let i = 0; i < overlays.length; i++) {
-    overlays[i].setMap(null);
-  }
-  overlays.length = 0; // ! clears the array... dont do this pls
-};
-
-// ! this still needs work --- just pulled it out
 export const buildQueryURL = (
   clusterRadius,
-  currentZoom,
-  firstRender,
+  zoomLevel,
   organization,
   token,
   treeid,
-  viewportBounds,
-  zoomLevel
+  viewportBounds
 ) => {
   let queryUrl = `${treetrackerApiUrl}trees?clusterRadius=${clusterRadius}&zoom_level=${zoomLevel}`;
 
   switch (true) {
-    case currentZoom >= 4 &&
-      !([token, organization, treeid].some(val => val != null) && firstRender):
-      queryUrl = `${queryUrl}&bounds=${viewportBounds}`;
+    case zoomLevel >= 4 &&
+      ![token, organization, treeid].some(val => val != null):
+    queryUrl = `${queryUrl}&bounds=${viewportBounds}`;
     /* eslint-disable-next-line no-fallthrough */
     case token != null:
-      queryUrl = `${queryUrl}&token=${token}`;
+      // queryUrl = `${queryUrl}&token=${token}`;
       break;
     case organization != null:
       queryUrl = `${queryUrl}&organization=${organization}`;
