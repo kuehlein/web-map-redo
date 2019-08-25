@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { MarkerClusterer, Marker } from "@react-google-maps/api";
 
-import './markerClusterer.module.scss';
+import "./markerClusterer.module.scss";
 
 function selectIcon(type) {
   if (type === "point") {
@@ -24,9 +24,9 @@ export default function MarkerClustererComponent({
   map,
   setCenter,
   setShowInfoWindow,
-  setInfoWindowData
+  setInfoWindowData,
+  setPoints
 }) {
-  console.log(markers);
   const clusters = markers && markers.length && markers[0].type === "cluster";
   let icon = "";
   if (clusters) {
@@ -48,7 +48,8 @@ export default function MarkerClustererComponent({
             treeImage,
             planterImage,
             status,
-            dateTracked
+            dateTracked,
+            index
           }) => (
             <Marker
               className="test"
@@ -59,7 +60,6 @@ export default function MarkerClustererComponent({
               label={clusters ? String(count) : null}
               icon={icon}
               onClick={event => {
-                console.log(type)
                 if (type === "cluster") {
                   zoomOnClick(event, map, setCenter);
                 } else {
@@ -69,8 +69,10 @@ export default function MarkerClustererComponent({
                     planterImage,
                     status,
                     dateTracked,
-                    treeId: id
+                    treeId: id,
+                    index
                   });
+                  setPoints(markers);
                   setShowInfoWindow(true);
                 }
               }}

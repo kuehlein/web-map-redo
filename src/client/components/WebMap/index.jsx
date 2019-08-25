@@ -32,7 +32,7 @@ async function handleMapMovement(map, setMarkers) {
   }
 }
 
-const WebMap = ({ setShowInfoWindow, setInfoWindowData }) => {
+const WebMap = ({ setShowInfoWindow, setInfoWindowData, setPoints }) => {
   // Set main state of component
   const [markers, setMarkers] = useState([]);
   const [map, setMap] = useState(null);
@@ -71,7 +71,7 @@ const WebMap = ({ setShowInfoWindow, setInfoWindowData }) => {
         onZoomChanged={() => handleMapMovement(map, setMarkers)}
       >
         <MarkerClusterer
-          {...{ markers, map, setCenter, setShowInfoWindow, setInfoWindowData }}
+          {...{ markers, map, setCenter, setShowInfoWindow, setInfoWindowData, setPoints }}
         />
       </GoogleMap>
     );

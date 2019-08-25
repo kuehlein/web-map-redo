@@ -1,6 +1,22 @@
 import React from "react";
 
-import './treeInfo.scss';
+import "./treeInfo.scss";
+
+// handle the index for a circular list
+export const getCircularPointIndex = (index, points) => {
+  if (index === points.length) {
+    return 0;
+  }
+  if (index < 0) {
+    return points.length - 1;
+  }
+  return index;
+};
+
+function handlePagination(index, value, setInfoWindowData, points) {
+  const currentIdx = getCircularPointIndex(index + value, points);
+  setInfoWindowData(points[currentIdx]);
+}
 
 export default function TreeInfo({
   planterName,
@@ -8,11 +24,24 @@ export default function TreeInfo({
   planterImage,
   status,
   dateTracked,
-  treeId
+  treeId,
+  index,
+  points,
+  setInfoWindowData
 }) {
-  console.log('do we get here?')
+  console.log(
+    planterName,
+    treeImage,
+    planterImage,
+    status,
+    dateTracked,
+    treeId,
+    index,
+    points,
+    setInfoWindowData
+  );
   return (
-    <section className="overlay_container test"> {/* // !--- */}
+    <section className="overlay_container">
       <div className="overlay">
         <span id="close-button">
           <div className="icon-angle-left" />
@@ -45,15 +74,32 @@ export default function TreeInfo({
             <span>Tree Id: </span>
             {treeId}
           </p>
-
           <br />
-          <div className="float-left info_data">
-            <a href="#" className="float-left tree_nav" id="tree_prev">
-              <img src="img/previous_tree.svg" />
-            </a>
-            <a href="#" className="float-right tree_nav" id="tree_next">
-              <img src="img/next_tree.svg" />
-            </a>
+          <div className="btn-arrow-container">
+            <button
+              type="button"
+              className="btn-link"
+              onClick={() =>
+                handlePagination(index, -1, setInfoWindowData, points)
+              }
+            >
+              <img
+                src="../../../../public/assets/media/previous_tree.svg"
+                alt="previous arrow"
+              />
+            </button>
+            <button
+              type="button"
+              className="btn-link"
+              onClick={() =>
+                handlePagination(index, 1, setInfoWindowData, points)
+              }
+            >
+              <img
+                src="../../../../public/assets/media/next_tree.svg"
+                alt="next arrow"
+              />
+            </button>
           </div>
         </div>
       </div>

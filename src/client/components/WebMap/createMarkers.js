@@ -83,13 +83,15 @@ function getClusters(clusters) {
     verified: false
  */
 function getPoints(points) {
-  return points.map(point => {
+  return points.map((point, index) => {
     const { lat, lon, id } = point;
     const planterName = `${point.first_name} ${point.last_name[0]}`;
     const treeImage = point.image_url;
-    const planterImage = point.user_image_url
-      ? point.user_image_url
-      : "../../../../assets/media/portrait_placeholder_100.png";
+    let planterImage = point.user_image_url || point.planter_photo_url;
+    if (!planterImage) {
+      planterImage =
+        "../../../../public/assets/media/portrait_placeholder_100.png";
+    }
     const status = startCase(point.status);
     const dateTracked = new Date(point.time_updated).toDateString().slice(4);
 
@@ -102,7 +104,8 @@ function getPoints(points) {
       treeImage,
       planterImage,
       status,
-      dateTracked
+      dateTracked,
+      index
     };
     return pointData;
   });
@@ -125,7 +128,7 @@ const createMarkers = async (zoomLevel, map) => {
   const { data } = response;
 
   if (data && data.length > 0) {
-    console.log(data)
+    console.log(data);
     const clusters = data[0].type === "cluster";
     let markers = [];
     if (clusters) {

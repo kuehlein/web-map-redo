@@ -1,12 +1,9 @@
 import React, { createContext, useState } from "react";
 
-// * import app.css before other components to apply styles
-// import "./app.css";
-
 import { WebMap } from "..";
-import { InfoWindow } from "@react-google-maps/api";
+import TreeInfo from "../TreeInfo";
 
-import './app.module.scss';
+import "./app.module.scss";
 
 const Context = createContext();
 
@@ -19,16 +16,15 @@ const Context = createContext();
 const App = () => {
   const [showInfoWindow, setShowInfoWindow] = useState(false);
   const [infoWindowData, setInfoWindowData] = useState(null);
-  console.log(showInfoWindow, infoWindowData)
+  const [points, setPoints] = useState(null);
+  console.log(infoWindowData);
   return (
     <Context.Provider>
       <main>
-        <div className="test">THIS WORKS</div>
-        {showInfoWindow && <InfoWindow infoWindowData={infoWindowData} />}
-        <WebMap
-          setShowInfoWindow={setShowInfoWindow}
-          setInfoWindowData={setInfoWindowData}
-        />
+        {showInfoWindow && (
+          <TreeInfo {...{ ...infoWindowData, setInfoWindowData, points }} />
+        )}
+        <WebMap {...{ setShowInfoWindow, setInfoWindowData, setPoints }} />
       </main>
     </Context.Provider>
   );
